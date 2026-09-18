@@ -2,7 +2,7 @@ import { setCookie, getCookie } from './cookie';
 
 import type { TIngredient, TOrder, TUser } from './types';
 
-const URL = process.env.BURGER_API_URL;
+const URL = 'https://norma.education-services.ru/api';
 
 const checkResponse = <T>(res: Response): Promise<T> =>
   res.ok ? res.json() : res.json().then((err) => Promise.reject(toApiError(err)));
@@ -11,11 +11,6 @@ type TServerResponse<T = unknown> = {
   success: boolean;
 } & T;
 
-/**
- * The API signals failure with a JSON payload rather than an HTTP error, so the
- * payload is wrapped in a real Error before rejecting. The original body is
- * kept in `cause` for debugging.
- */
 const toApiError = (payload: unknown): Error => {
   const message =
     typeof payload === 'object' &&
