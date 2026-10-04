@@ -1,26 +1,33 @@
 import { Preloader, OrderInfoUI } from '@ui';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
-import type { TIngredient } from '@utils-types';
+import { useSelector } from '../../services/store';
+import { selectIngredients } from '../../services/slices/ingredientsSlice';
+
+import { getOrderByNumberApi } from '../../utils/burger-api';
+
+import type { TIngredient, TOrder } from '@utils-types';
 
 export const OrderInfo = (): React.JSX.Element => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0,
-  };
+  const { number } = useParams<{ number: string }>();
 
-  const ingredients: TIngredient[] = [];
+  const ingredients = useSelector(selectIngredients);
 
-  /**
-   * использование useMemo не обязательно
-   */
-  /* Готовим данные для отображения */
+  const [orderData, setOrderData] = useState<TOrder | null>(null);
+
+  useEffect(() => {
+    if (!number) return;
+
+    getOrderByNumberApi(Number(number))
+      .then((res) => {
+        if (res && res.orders && res.orders.length > 0) {
+          setOrderData(res.orders[0]);
+        }
+      })
+      .catch((err) => console.error('Ошибка загрузки данных заказа:', err));
+  }, [number]);
+
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
@@ -31,7 +38,7 @@ export const OrderInfo = (): React.JSX.Element => {
     const ingredientsInfo = orderData.ingredients.reduce(
       (acc: TIngredientsWithCount, item) => {
         if (!acc[item]) {
-          const ingredient = ingredients.find((ing) => ing._id === item);
+          const ingredient = ingredients.find((ing: TIngredient) => ing._id === item);
           if (ingredient) {
             acc[item] = {
               ...ingredient,
@@ -39,7 +46,9 @@ export const OrderInfo = (): React.JSX.Element => {
             };
           }
         } else {
-          acc[item].count++;
+          if (acc[item]) {
+            acc[item].count++;
+          }
         }
 
         return acc;

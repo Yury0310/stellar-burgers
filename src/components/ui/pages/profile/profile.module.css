@@ -1,5 +1,7 @@
 .container {
   composes: container from '../common.module.css';
+  display: flex;
+  justify-content: center;
 }
 
 .menu {
