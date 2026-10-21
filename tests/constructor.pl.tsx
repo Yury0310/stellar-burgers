@@ -125,6 +125,8 @@ test.describe('Тест создания заказа', () => {
 
     // Проверяем номер заказа
     const modal = page.locator('#modals');
-    await expect(modal.getByTestId('order-number')).toHaveText(/^\d+$/);
+    await expect(modal.getByTestId('order-number')).toHaveText('560');
+    await expect(constructor.getByText(`${bunName} (верх)`)).toHaveCount(0);
+    await expect(constructor.getByText(mainName)).toHaveCount(0);
   });
 });
